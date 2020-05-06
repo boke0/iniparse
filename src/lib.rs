@@ -2,9 +2,26 @@ use std::collections::HashMap;
 use std::io::prelude::*;
 
 #[derive(Clone, Debug, PartialEq)]
-enum IniData {
+pub enum IniData {
     Value(String),
     Section(IniDataMap)
+}
+
+impl IniData {
+    pub fn value(&self) -> Option<&str> {
+        if let IniData::Value(s) = self {
+            Some(s)
+        }else{
+            None
+        }
+    }
+    pub fn section(&self) -> Option<&IniDataMap> {
+        if let IniData::Section(s) = self {
+            Some(s)
+        }else{
+            None
+        }
+    }
 }
 
 enum State {
@@ -15,12 +32,12 @@ enum State {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-struct IniDataMap {
+pub struct IniDataMap {
     map: HashMap<String, IniData>,
 }
 
 impl IniDataMap {
-    pub fn from_bytes(bytes: Vec<u8>) -> IniDataMap {
+    pub fn from_bytes(bytes: &[u8]) -> IniDataMap {
         let mut map = HashMap::new();
         let mut mapbuf = HashMap::new();
         let mut sbuf = String::new();
@@ -97,6 +114,9 @@ impl IniDataMap {
             map
         }
     }
+    pub fn get(&self, k: &str) -> Option<&IniData> {
+        self.map.get(k)
+    }
 }
 
 #[cfg(test)]
@@ -121,7 +141,7 @@ mod tests {
                 }
             }
         }
-        let data = IniDataMap::from_bytes(bytes);
+        let data = IniDataMap::from_bytes(&bytes);
         let mut map = HashMap::new();
         map.insert("foo".to_string(), IniData::Value("bar".to_string()));
         map.insert("spam".to_string(), IniData::Value("ham".to_string()));
